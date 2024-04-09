@@ -1,4 +1,4 @@
-# {project}
+# Assert-testing
 
 Executing the program can either be done via
 ```
