@@ -1,12 +1,11 @@
 (ns build
-  (:require [clojure.java.io :as io]
-            [clojure.tools.build.api :as b]))
+  (:require [clojure.tools.build.api :as b]))
 
 (def lib 'fiv0/assert-testing)
 (def version (format "0.1.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
-(def jar-file (format "target/%s-%s.jar" (name lib) version))
+(def uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
 (def main 'main)
 
 (defn clean
@@ -23,38 +22,22 @@
             ;; ignore Unsafe warnings
             :javac-opts ["-XDignore.symbol.file", "-Xlint:-options"]}))
 
-(defn java-pom
-  "Creates a pom.xml file at the root of the repository for the java files.
-  Useful when working on the java files with other tools integrating maven."
-  [_]
-  (let [pom-dir (io/file class-dir "META-INF/maven/" (namespace lib) (name lib))
-        pom-xml (io/file pom-dir "pom.xml")
-        pom-properties (io/file pom-dir "pom.properties")]
-    (b/write-pom {:class-dir class-dir
-                  :lib lib
-                  :version version
-                  :basis basis
-                  :src-dirs ["src/java"]})
-    (io/copy pom-xml (io/file "pom.xml"))
-    (io/delete-file pom-xml)
-    (io/delete-file pom-properties)
-    nil))
-
-(defn jar
-  "Creates a jar file of the project."
-  [_]
-  (b/write-pom {:class-dir class-dir
-                :lib lib
-                :version version
-                :basis basis
-                :src-dirs ["src/clj"]})
-  (b/copy-dir {:src-dirs ["src/clj" "resources"]
+(defn uber [_]
+  (clean nil)
+  (b/copy-dir {:src-dirs ["src" "resources"]
                :target-dir class-dir})
   (java nil)
-  (b/jar {:class-dir class-dir
-          :jar-file jar-file}))
+  (b/compile-clj {:basis basis
+                  :ns-compile '[main]
+                  :class-dir class-dir
+                  ;; to disable clojure assertions in an artifact
+                  #_#_:bindings {#'clojure.core/*assert* false}})
+  (b/uber {:class-dir class-dir
+           :uber-file uber-file
+           :basis basis
+           :main 'main}))
 
 (comment
   (clean nil)
   (java nil)
-  (jar nil))
+  (uber nil))

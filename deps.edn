@@ -7,9 +7,11 @@
  {:dev
   {:extra-paths ["dev"]
    :extra-deps  {org.clojure/tools.namespace {:mvn/version "1.1.0"}
-                 com.lambdaisland/classpath  {:mvn/version "0.0.27"}}}
+                 com.lambdaisland/classpath  {:mvn/version "0.0.27"}}
+   :jvm-opts [;; enable java assertions
+              #_ "-ea"]}
 
-  :build {:extra-deps {io.github.clojure/tools.build {:git/tag "v0.8.4" :git/sha "8c3cd69"}}
+  :build {:extra-deps {io.github.clojure/tools.build {:git/tag "v0.10.0" :git/sha "3a2c484"}}
           :ns-default build}}
 
  :mvn/repos

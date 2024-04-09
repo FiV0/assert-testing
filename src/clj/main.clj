@@ -12,3 +12,8 @@
       "java" (Util/different a b)
       "clj" (different a b)
       (throw (UnsupportedOperationException.)))))
+
+(comment
+  (Util/different 1 1)
+  (different 1 1)
+  (set! *assert* false))
